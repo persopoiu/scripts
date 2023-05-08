@@ -1,4 +1,6 @@
 -- Made by upio for legit doors
+-- ty oogway for the gun idle animation id
+
 local Functions = loadstring(game:HttpGet("https://raw.githubusercontent.com/RegularVynixu/Utilities/main/Functions.lua"))()
 local CustomShop = loadstring(game:HttpGet("https://raw.githubusercontent.com/RegularVynixu/Utilities/main/Doors/Custom%20Shop%20Items/Source.lua"))()
 
@@ -10,6 +12,12 @@ local seekGun = game:GetObjects("rbxassetid://13386404155")[1] or LoadCustomInst
 local seekGoo = game:GetObjects("rbxassetid://13386436753")[1] or LoadCustomInstance("https://raw.githubusercontent.com/persopoiu/scripts/main/SeekGunAssets/SeekAmmo.rbxm")
 
 seekGun.TextureId = LoadCustomAsset("https://raw.githubusercontent.com/persopoiu/scripts/main/SeekGunAssets/SeekShopDisplay.png")
+
+local anim = Instance.new("Animation")
+anim.Name = "M249Idle"
+anim.AnimationId = "rbxassetid://3034291703"
+
+local track = game.Players.LocalPlayer.Character.Humanoid:LoadAnimation(anim)
 
 if mainui.ItemShop and mainui.ItemShop.Visible then
     CustomShop.CreateItem(seekGun, {
@@ -32,6 +40,14 @@ function playSound(rbxassetid,part)
         sound:Destroy()
     end)
 end
+
+seekGun.Equipped:Connect(function()
+    track:Play()
+end)
+
+seekGun.Unequipped:Connect(function()
+    track:Stop()
+end)
 
 seekGun.Activated:Connect(function()
     local seekGooClone = seekGoo:Clone()
