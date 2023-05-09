@@ -45,7 +45,7 @@ seekGun.Activated:Connect(function()
     seekAmmoClone.Parent = workspace
     seekAmmoClone.CFrame = spawnPos
 
-    playSound("rbxassetid://1905367471")
+    playSound("rbxassetid://9119135785")
 
     seekAmmoClone.Touched:Connect(function(hit)
         seekAmmoClone:Destroy()
