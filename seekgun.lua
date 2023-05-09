@@ -49,16 +49,12 @@ seekGun.Activated:Connect(function()
 
     seekAmmoClone.Touched:Connect(function(hit)
         seekAmmoClone:Destroy()
-        playSound("rbxassetid://344167846")
         
         task.spawn(function()
             local model = hit:FindFirstAncestorWhichIsA("Model")
 
             if model ~= nil and not (workspace.CurrentRooms:FindFirstChild(model.Name)) then
-                local seekpointlight = Instance.new("PointLight",model)
-                seekpointlight.Range = 10
-                seekpointlight.Brightness = 3
-                seekpointlight.Color = Color3.fromRGB(255, 0, 0)
+                playSound("rbxassetid://344167846")
 
                 for _,instance in ipairs(model:GetDescendants()) do
                     if instance:IsA("BasePart") or instance:IsA("Part") or instance:IsA("MeshPart") then
