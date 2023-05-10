@@ -26,10 +26,6 @@ end
 
 seekGun.Parent = player.Backpack
 
-function starts(String,Start)
-    return string.sub(String,1,string.len(Start))==Start
-end
-
 function playSound(rbxassetid,part)
     task.spawn(function()
         local sound = Instance.new("Sound",part or game:GetService("ReplicatedStorage"))
@@ -45,7 +41,7 @@ local function check(room)
     
     if Assets then
         for _,obj in ipairs(Assets:GetChildren()) do
-            if starts(obj.Name,"Painting") then
+            if string.match(obj.Name,"Painting") or string.match(obj.Name,"painting") then
                 for _,instance in ipairs(obj:GetDescendants()) do
                     if instance:IsA("BasePart") or instance:IsA("Part") or instance:IsA("MeshPart") then
                         instance.CanTouch = true
@@ -56,17 +52,19 @@ local function check(room)
     end
 end
 
-local addconnect
-addconnect = workspace.CurrentRooms.ChildAdded:Connect(function(room)
-    check(room)
+local rsconnect
+rsconnect = game:GetService("RunService").RenderStepped:Connect(function(room)
+    for i,v in pairs(workspace.CurrentRooms:GetChildren()) do
+        task.defer(function()
+            check(v)
+        end)
+    end
 end)
 
-for i,v in pairs(workspace.CurrentRooms:GetChildren()) do
-    check(v)
-end
+
 task.spawn(function()
     repeat task.wait() until seekGun == nil or not (seekGun:IsDescendantOf(player.Character) or seekGun:IsDescendantOf(player.Backpack))
-    addconnect:Disconnect()
+    rsconnect:Disconnect()
     seekAmmo:Destroy()
 end)
 
