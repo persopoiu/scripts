@@ -63,7 +63,7 @@ end)
 
 for i,v in pairs(workspace.CurrentRooms:GetChildren()) do
     check(v)
-enda
+end
 task.spawn(function()
     repeat task.wait() until seekGun == nil or not (seekGun:IsDescendantOf(player.Character) or seekGun:IsDescendantOf(player.Backpack))
     addconnect:Disconnect()
