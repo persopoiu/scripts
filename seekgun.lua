@@ -52,19 +52,18 @@ local function check(room)
     end
 end
 
-local rsconnect
-rsconnect = game:GetService("RunService").RenderStepped:Connect(function(room)
-    for i,v in pairs(workspace.CurrentRooms:GetChildren()) do
-        task.defer(function()
-            check(v)
-        end)
-    end
+local addconnect
+addconnect = workspace.CurrentRooms.ChildAdded:Connect(function(room)
+    check(room)
 end)
 
+for i,v in pairs(workspace.CurrentRooms:GetChildren()) do
+    check(v)
+enda
 
 task.spawn(function()
     repeat task.wait() until seekGun == nil or not (seekGun:IsDescendantOf(player.Character) or seekGun:IsDescendantOf(player.Backpack))
-    rsconnect:Disconnect()
+    addconnect:Disconnect()
     seekAmmo:Destroy()
 end)
 
