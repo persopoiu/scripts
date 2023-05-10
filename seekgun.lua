@@ -1,6 +1,9 @@
 -- Made by upio for legit doors
+
 local Functions = loadstring(game:HttpGet("https://raw.githubusercontent.com/RegularVynixu/Utilities/main/Functions.lua"))()
 local CustomShop = loadstring(game:HttpGet("https://raw.githubusercontent.com/RegularVynixu/Utilities/main/Doors/Custom%20Shop%20Items/Source.lua"))()
+
+local tweenService = game:GetService("TweenService")
 
 local player = game.Players.LocalPlayer
 local mainui = player.PlayerGui.MainUI
@@ -8,6 +11,8 @@ local mouse = player:GetMouse()
 
 local seekGun = game:GetObjects("rbxassetid://13386404155")[1] or LoadCustomInstance("https://raw.githubusercontent.com/persopoiu/scripts/main/SeekGunAssets/SeekPistol.rbxm")
 local seekAmmo = game:GetObjects("rbxassetid://13386436753")[1] or LoadCustomInstance("https://raw.githubusercontent.com/persopoiu/scripts/main/SeekGunAssets/SeekAmmo.rbxm")
+local seekPuddle = game:GetObjects("rbxassetid://13398815770")[1] or LoadCustomInstance("https://raw.githubusercontent.com/persopoiu/scripts/main/SeekGunAssets/SeekPuddle.rbxm")
+seekPuddle.Size = Vector3.new(0.001, 0.001, 0.001)
 
 if mainui.ItemShop and mainui.ItemShop.Visible then
     CustomShop.CreateItem(seekGun, {
@@ -21,6 +26,10 @@ end
 
 seekGun.Parent = player.Backpack
 
+function starts(String,Start)
+    return string.sub(String,1,string.len(Start))==Start
+end
+
 function playSound(rbxassetid,part)
     task.spawn(function()
         local sound = Instance.new("Sound",part or game:GetService("ReplicatedStorage"))
@@ -31,6 +40,51 @@ function playSound(rbxassetid,part)
     end)
 end
 
+local function check(room)
+    local Assets = room:WaitForChild("Assets",2)
+    
+    if Assets then
+        for _,obj in ipairs(Assets:GetChildren()) do
+            if starts(obj.Name,"Painting") then
+                for _,instance in ipairs(obj:GetDescendants()) do
+                    if instance:IsA("BasePart") or instance:IsA("Part") or instance:IsA("MeshPart") then
+                        instance.CanTouch = true
+                    end
+                end
+            end
+        end
+    end
+end
+
+local addconnect
+addconnect = workspace.CurrentRooms.ChildAdded:Connect(function(room)
+    check(room)
+end)
+
+for i,v in pairs(workspace.CurrentRooms:GetChildren()) do
+    check(v)
+enda
+task.spawn(function()
+    repeat task.wait() until seekGun == nil or not (seekGun:IsDescendantOf(player.Character) or seekGun:IsDescendantOf(player.Backpack))
+    addconnect:Disconnect()
+    seekAmmo:Destroy()
+end)
+
+function playPuddleAnimationOverModel(model)
+    task.spawn(function()
+        local seekPuddleClone = seekPuddle:Clone()
+
+        seekPuddleClone.Position = model["Left Leg"].Position - Vector3.new(0,0.8,0)
+        
+        seekPuddleClone.CanCollide = true
+        seekPuddleClone.Anchored = true
+        seekPuddleClone.Parent = workspace
+
+        tweenService:Create(seekPuddleClone,TweenInfo.new(1.5,Enum.EasingStyle.Sine),{
+            ["Size"] = Vector3.new(10, 0.636, 10)
+        }):Play()
+    end)
+end
 
 seekGun.Activated:Connect(function()
     local seekAmmoClone = seekAmmo:Clone()
@@ -45,29 +99,51 @@ seekGun.Activated:Connect(function()
     seekAmmoClone.Parent = workspace
     seekAmmoClone.CFrame = spawnPos
 
-    playSound("rbxassetid://9119135785")
+    playSound("rbxassetid://1905367471")
 
     seekAmmoClone.Touched:Connect(function(hit)
         seekAmmoClone:Destroy()
         
         task.spawn(function()
-            local model = hit:FindFirstAncestorWhichIsA("Model")
+            if not (game.Players:GetPlayerFromCharacter(hit.Parent)) and hit.Name ~= "Hidden" then
+                local model = hit:FindFirstAncestorWhichIsA("Model")
 
-            if model ~= nil and not (workspace.CurrentRooms:FindFirstChild(model.Name)) then
-                playSound("rbxassetid://344167846")
+                if model ~= nil and not (workspace.CurrentRooms:FindFirstChild(model.Name)) and model ~= workspace then
+                    playSound("rbxassetid://344167846")
 
-                for _,instance in ipairs(model:GetDescendants()) do
-                    if instance:IsA("BasePart") or instance:IsA("Part") or instance:IsA("MeshPart") then
-                        instance.Anchored = false
-                        instance.Material = "Foil"
-                        instance.Color = Color3.fromRGB(0,0,0)
+                    for _,instance in ipairs(model:GetDescendants()) do
+                        if instance:IsA("BasePart") or instance:IsA("Part") or instance:IsA("MeshPart") then
+                            instance.Anchored = false
+                            instance.Material = "Foil"
+                            instance.Color = Color3.fromRGB(0,0,0)
+                        end
+
+                        if instance:IsA("TextLabel") then
+                            instance.TextColor3 = Color3.fromRGB(255,255,255)
+                        end
                     end
 
-                    if instance:IsA("TextLabel") then
-                        instance.TextColor3 = Color3.fromRGB(255,255,255)
+                    if model.Name == "JeffTheKiller" then
+                        local humanoid = model:FindFirstChildOfClass("Humanoid")
+
+                        if humanoid.Health ~= 0 then
+                            playPuddleAnimationOverModel(model)
+                            playSound("rbxassetid://1196653896")
+                        end
+                        
+                        humanoid.Health = 0
                     end
                 end
 
+                if hit.Name == "BananaPeel" and hit:IsDescendantOf(workspace) then
+                    playSound("rbxassetid://344167846")
+                    
+                    hit.Color = Color3.fromRGB(0,0,0)
+                    hit.Material = "Foil"
+
+                    local mesh = hit:FindFirstChildOfClass("SpecialMesh")
+                    mesh.TextureId = ""
+                end
             end
         end)
     end)
